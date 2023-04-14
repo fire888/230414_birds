@@ -23,8 +23,16 @@ export const ExporterScene = {
             }
 
 
-            reader.onload = onload;
-            reader.readAsArrayBuffer(chosenFile[0]);
+            //reader.onload = onload;
+            reader.onload = callback;
+            reader.readAsArrayBuffer(chosenFile[0])
+            //reader.readAsArrayBuffer(chosenFile[0]);
+            // if ( reader.readAsBinaryString !== undefined ) {
+            //     reader.readAsBinaryString(chosenFile[0]);
+            // } else {
+            //     reader.readAsArrayBuffer(chosenFile[0]);
+            // }
+            
         })
     },
 }

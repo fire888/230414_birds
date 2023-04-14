@@ -16,7 +16,7 @@ const BACK_COLOR = 0xc8cfd4
 //const LIGHT_COLOR = 0xf7e2d7
 const LIGHT_COLOR = 0xffffff
 
-const CAM_POS = [0, 50, -30]
+const CAM_POS = [0, 50, 50]
 const CAM_TARGET_POS = [0, 0, 0]
 
 
@@ -45,9 +45,9 @@ export const createStudio = (cubeMap) => {
     container.appendChild(renderer.domElement)
 
 
-    const light = new THREE.DirectionalLight(0xffffff, 1)
-    light.position.set(0, 100, 100)
-    scene.add(light)
+    const light = new THREE.PointLight(0xffffff, 1)
+    light.position.set(0, 0, 0)
+    camera.add(light)
 
     const ambLight = new THREE.AmbientLight(0x333333, .7)
     scene.add(ambLight)
@@ -88,7 +88,7 @@ export const createStudio = (cubeMap) => {
             meshContainer.add(model)
         },
         removeFromScene(model) {
-            scene.remove(model)
+            meshContainer.remove(model)
         },
         render () {
             if (!camera) {

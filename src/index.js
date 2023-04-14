@@ -9,154 +9,174 @@ import { loadAssets } from "./helpers/loadManager"
 import { ASSETS } from "./constants/ASSETS"
 import craneT from "./assets/Crane_testAnim_v01.glb";
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js';
+import {createUi} from './ui/ui'
+import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js'
+import { GLTFLoader,GLTFParser } from 'three/examples/jsm/loaders/GLTFLoader'
+//const { DRACOLoader } = await import( '../../examples/jsm/loaders/DRACOLoader.js' );
 
 
-const saveScene = root => {
-    setTimeout(() => {
-        console.log(root.studio.scene)
-        const res = root.studio.scene.toJSON()
-        console.log('!!!', res)
-        ExporterScene.export(res)
-    }, 1000)
+
+
+
+// const saveScene = root => {
+//     setTimeout(() => {
+//         console.log(root.studio.scene)
+//         const res = root.studio.scene.toJSON()
+//         console.log('!!!', res)
+//         ExporterScene.export(res)
+//     }, 1000)
+// }
+
+const addLoadFileListener = f => {
+    ExporterScene.load(data => {
+        console.log('!!', data)
+        const result = new FBXLoader().parse(data.target.result)
+        f(result)
+    })
 }
 
-const addLoadFileListener = root => {
-    let aa = true
-    document.body.addEventListener('click', () => {
-        if (!aa) {
-            return;
-        }
-        aa = false
-        ExporterScene.load(data => {
-            console.log('!!', data)
-            const loader = new THREE.ObjectLoader();
-            const object = loader.parse(data);
-            root.studio.addToScene(object)
-
+const addLoadFileListenerBird = f => {
+    ExporterScene.load(data => {
+        console.log('!!', data)
+        new GLTFLoader().parse(data.target.result, '', r => {
+            f(r)
         })
+
     })
 }
 
 
 const threeApp = () => {
+    const shape = new THREE.Shape();
+    const x = -2.5;
+    const y = -5;
+    shape.moveTo(x + 2.5, y + 2.5);
+    shape.bezierCurveTo(x + 2.5, y + 2.5, x + 2, y, x, y);
+    shape.bezierCurveTo(x - 3, y, x - 3, y + 3.5, x - 3, y + 3.5);
+    shape.bezierCurveTo(x - 3, y + 5.5, x - 1.5, y + 7.7, x + 2.5, y + 9.5);
+    shape.bezierCurveTo(x + 6, y + 7.7, x + 8, y + 4.5, x + 8, y + 3.5);
+    shape.bezierCurveTo(x + 8, y + 3.5, x + 8, y, x + 5, y);
+    shape.bezierCurveTo(x + 3.5, y, x + 2.5, y + 2.5, x + 2.5, y + 2.5);
+
+    const extrudeSettings = {
+    steps: 2,
+    depth: 2,
+    bevelEnabled: true,
+    bevelThickness: 1,
+    bevelSize: 1,
+    bevelSegments: 2,
+    };
+
+    const g = new THREE.ExtrudeGeometry(shape, extrudeSettings)
+    const mat = new THREE.MeshPhongMaterial({ color: 0xff0000 }) 
+
+
+
+
+
+
+
+
+
+    const arrMatrices = []
+    const arrBoxes = []
+    let mixer
+
+
     const studio = createStudio()
-
-
-
     const root = {
         studio,
     }
+    const ui = createUi()
+    ui.setOnClick('add soldier points (fbx)', () => {
+        addLoadFileListener(file => {
+            console.log(file)
+            root.studio.addToScene(file)
 
 
+            file.traverse(item => {
+                if (item.name.includes('a090b')) {
+                    arrMatrices.push({
+                        q: item.quaternion.clone(),
+                        p: item.position.clone(),
+                        s: item.scale.clone()
+                    })
+                   
+                }
+            })
 
-     loadAssets(ASSETS).then(assets => {
-         console.log(assets)
-         const arrMatrices = []
-         let count = 0
-         studio.addToScene(assets.rzev.model)
+            for (let i = 0; i < arrMatrices.length; ++i) {
+                const b = new THREE.Mesh(
+                    g, mat
+                )
+                root.studio.addToScene(b)
+                b.quaternion.copy( arrMatrices[i].q)
+                b.position.copy(arrMatrices[i].p)
+                b.scale.copy(arrMatrices[i].s)//.multiplyScalar(100)
+                arrBoxes.push(b)
+            }
 
-         assets.rzev.model.visible = false
-         assets.rzev.model.children[0].material = new THREE.MeshBasicMaterial()
-         assets.rzev.model.children[0].geometry.computeVertexNormals()
-         console.log('bird', assets.rzev.model.children[0])
+        })
+    })
 
-         assets.rzev.model.traverse(item => {
-             if (item.name.includes('a090b')) {
-                 arrMatrices.push({
-                     key: count,
-                     q: item.quaternion.clone(),
-                     p: item.position.clone(),
-                     s: item.scale.clone()
-                     //elements: item.matrixWorld.elements
-                 })
-                 ++count
-             }
-         })
+    ui.setOnClick('add bird (glb)', () => {
+        addLoadFileListenerBird(file => {
+            console.log('---', file)
+            root.studio.addToScene(file.scene)
 
-
-
-        //  const shape = new THREE.Shape();
-        //  const x = -2.5;
-        //  const y = -5;
-        //  shape.moveTo(x + 2.5, y + 2.5);
-        //  shape.bezierCurveTo(x + 2.5, y + 2.5, x + 2, y, x, y);
-        //  shape.bezierCurveTo(x - 3, y, x - 3, y + 3.5, x - 3, y + 3.5);
-        //  shape.bezierCurveTo(x - 3, y + 5.5, x - 1.5, y + 7.7, x + 2.5, y + 9.5);
-        //  shape.bezierCurveTo(x + 6, y + 7.7, x + 8, y + 4.5, x + 8, y + 3.5);
-        //  shape.bezierCurveTo(x + 8, y + 3.5, x + 8, y, x + 5, y);
-        //  shape.bezierCurveTo(x + 3.5, y, x + 2.5, y + 2.5, x + 2.5, y + 2.5);
-        //
-        //  const extrudeSettings = {
-        //      steps: 2,
-        //      depth: 2,
-        //      bevelEnabled: true,
-        //      bevelThickness: 1,
-        //      bevelSize: 1,
-        //      bevelSegments: 2,
-        //  };
-        //
-        // const g = new THREE.ExtrudeGeometry(shape, extrudeSettings)
+            if (arrMatrices.length === 0) {
+                root.studio.addToScene(file.scene)
+                file.scene.scale.multiplyScalar(100)
 
 
-
-        console.log(JSON.stringify(arrMatrices))
-        root.assets = assets
-        //createContainerFlat(root)
-
-         root.studio.addToScene(assets.rzev.model)
-         assets.craneT.model.scene.scale.set(15, 15, 15)
-         assets.craneT.model.scene.position.y = 15
-         studio.addToScene(assets.craneT.model.scene)
-
-
-         const bird = assets.craneT.model
-         console.log(bird)
-         const materialBird = new THREE.MeshPhongMaterial({ color: 0xFF0000, wireframe: true })
-         bird.scene.traverse(item => {
-             if (item.type === 'SkinnedMesh') {
-                 item.material = materialBird
-             }
-         })
-
-         for (let i = 0; i < arrMatrices.length; ++i) {
-             //const b = new THREE.Mesh(
-             //    g,
-             //    new THREE.MeshPhongMaterial({ color: 0xff0000 })
-             //)
-             const bird02 = clone(bird.scene)
-             root.studio.addToScene(bird02)
-             bird02.quaternion.copy( arrMatrices[i].q)
-             bird02.position.copy(arrMatrices[i].p)
-             bird02.scale.copy(arrMatrices[i].s).multiplyScalar(100)
-             //bird02.matrixWorld.elements = arrMatrices[i].elements
-             //bird02.matrixWorldNeedsUpdate = true
-             setTimeout(() => {
-                 console.log('b02',bird02)
-                 //bird02.scale.set(5, 5, 5)
-             }, 100)
-         }
+                mixer = new THREE.AnimationMixer( file.scene );
+                const clips = file.animations;
+                
+                
+                // Play a specific animation
+                for (let i = 0; i < clips.length; ++i) {
+                    const action = mixer.clipAction( clips[i]);
+                    ui.setOnClick(clips[i].name + ' play', () => {
+                        action.play();
+                    })
+                    ui.setOnClick(clips[i].name + ' stop', () => {
+                        action.stop();
+                    })
+                    
+                    
+                }
 
 
-         //const bird02 = clone(mesh.scene)
-         //bird02.position.set(15, 15, 0)
+            } else {
+                for (let i = 0; i < arrBoxes.length; ++i) {
+                    root.studio.removeFromScene(arrBoxes[i])    
+                }
+                for (let i = 0; i < arrMatrices.length; ++i) {
+                    const bird02 = clone(file.scene)
+                    root.studio.addToScene(bird02)
+                    bird02.quaternion.copy( arrMatrices[i].q)
+                    bird02.position.copy(arrMatrices[i].p)
+                    bird02.scale.copy(arrMatrices[i].s).multiplyScalar(100)
 
-         //studio.addToScene(bird02)
-         // const mixer = new THREE.AnimationMixer(mesh);
-         // const clips = mesh.animations;
-         // const clip = clips[0]
-         // const action = mixer.clipAction(clip);
-         // action.play();
+                }
+            }
+
+        })
+    })
+
+    
+
+
 
          const animate = () => {
-             //mixer.update(15)
+            mixer && mixer.update(0.015)
              requestAnimationFrame( animate );
              studio.render()
          }
          animate()
 
-         addLoadFileListener(root)
         //saveScene(root)
-    })
+
 
     const onWindowResize = () => {
         studio.resize()
