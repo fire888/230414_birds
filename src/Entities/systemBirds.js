@@ -70,8 +70,6 @@ export const createSystemBirds = (root) => {
                     return;
                 }
 
-                console.log(i)
-                console.log(paths[i][0].p.x)
                 birds[i].startAnimation(paths[i])
                 setTimeout(() => iterate(i + 1), 1000)
             }

@@ -4,8 +4,8 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 const PADDING = 0
 const BACK_COLOR = 0xc8cfd4
-const CAM_POS = [0, 20, -30]
-const CAM_TARGET_POS = [0, 0, 0]
+const CAM_POS = [0, 10, -20]
+const CAM_TARGET_POS = [0, 8, 0]
 
 
 

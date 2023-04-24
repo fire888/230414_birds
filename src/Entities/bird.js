@@ -10,6 +10,9 @@ export const createBird = asset => {
     const clip1 = gltf.animations[0]
     const action1 = mixer.clipAction(clip1)
 
+    const clip2 = gltf.animations[1]
+    const action2 = mixer.clipAction(clip2)
+
     let pathPoints = null
     let isUpdate = false
     let dist = 0.001
@@ -40,6 +43,13 @@ export const createBird = asset => {
         startAnimation: (pP) => {
             pathPoints = pP
             action1.play()
+            setTimeout(() => {
+                action1.fadeOut(.3)
+                action2.play()
+                setTimeout(() => {
+                    action1.stop()
+                }, 300)
+            }, 4133)
             isUpdate = true
         },
     }

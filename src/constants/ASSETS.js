@@ -8,7 +8,7 @@ import nz from '../assets/env00/nz.jpg'
 import pz from '../assets/env00/pz.jpg'
 
 
-import craneT from '../assets/testa3.glb'
+import craneT from '../assets/testa4.glb'
 import rzev from '../assets/Rzhev_test01.fbx'
 import flyPoints from '../assets/points.fbx'
 
