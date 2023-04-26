@@ -33,9 +33,9 @@ const threeApp = () => {
             if (item.name.includes('a090b')) {
                 arrPlaces.push({
                     key: count,
-                    q: item.quaternion.clone(),
-                    p: item.position.clone(),
-                    s: item.scale.clone()
+                    q: item.quaternion.toArray(),
+                    p: item.position.toArray(),
+                    s: item.scale.toArray(),
                 })
                 ++count
             }

@@ -1,34 +1,44 @@
 import { createBird } from "./bird";
+import * as THREE from 'three'
 
 export const createSystemBirds = (root) => {
     const birds = []
     let places = []
     let paths = []
-    let firstBirdPathPoints = null
+    let zeroPathPoints = null
     let gltf = null
 
     const preparePaths = () => {
         const defaultPath = []
-        for (let i = 0; i < firstBirdPathPoints.length; ++i) {
-            const v = firstBirdPathPoints[i].p.clone()
+        for (let i = 0; i < zeroPathPoints.length; ++i) {
             defaultPath.push({
-                p: v,
-                q: firstBirdPathPoints[i].q.clone(),
+                p: new THREE.Vector3(...zeroPathPoints[i].p),
+                q: new THREE.Quaternion(...zeroPathPoints[i].q),
             })
         }
+        //
+        // for (let i = 0; i < places.length; ++i) {
+        //     places[i].p[0] *= 10
+        //     places[i].p[1] *= 10
+        //     places[i].p[2] *= 10
+        // }
 
 
         for (let i = 0; i < places.length; ++i) {
             const path = []
             path.push ({
-                q: places[i].q.clone(),
-                p: places[i].p.clone().multiplyScalar(10),
+                q: new THREE.Quaternion().fromArray(places[i].q),
+                p: new THREE.Vector3(
+                    places[i].p[0] * 10,
+                    places[i].p[1] * 10,
+                    places[i].p[2] * 10,
+                ),
             })
             for (let j = 1; j < defaultPath.length; ++j) {
                 const p = defaultPath[j].p.clone()
-                p.x += places[i].p.x * 10
-                p.y += places[i].p.y * 10
-                p.z += places[i].p.z * 10
+                p.x += places[i].p[0] * 10
+                p.y += places[i].p[1] * 10
+                p.z += places[i].p[2] * 10
                 path.push({
                     p,
                     q: defaultPath[j].q.clone(),
@@ -44,12 +54,12 @@ export const createSystemBirds = (root) => {
         },
         addPlaces: arr => {
             places = arr
-            if (firstBirdPathPoints) {
+            if (zeroPathPoints) {
                 preparePaths()
             }
         },
         addFirstBirdPath: pathPoints => {
-            firstBirdPathPoints = pathPoints
+            zeroPathPoints = pathPoints
             if (places) {
                 preparePaths()
             }
@@ -58,8 +68,8 @@ export const createSystemBirds = (root) => {
             for (let i = 0; i < places.length; ++i) {
                 const bird = createBird(gltf)
                 root.studio.addToScene(bird.object)
-                bird.object.quaternion.copy(places[i].q)
-                bird.object.position.copy(places[i].p)
+                bird.object.quaternion.fromArray(places[i].q)
+                bird.object.position.fromArray(places[i].p)
                 bird.scaleSet(100)
                 birds.push(bird)
             }
